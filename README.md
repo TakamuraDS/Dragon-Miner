@@ -24,4 +24,4 @@ Dragon Miner é um software de mineração Bitcoin open-source, fácil de usar e
 
 Dragon Miner é um software open-source distribuído sob a [licença MIT](https://example.com/license).
 
-Desenvolvido com ❤️ by Dragon Miner Team.
+Desenvolvido com ❤️ by Takamura.
