@@ -1,5 +1,7 @@
 # Dragon Miner - Mineração de Bitcoin Simplificada
 
+![image](https://github.com/user-attachments/assets/044331c1-066c-4093-8d55-6e9242a700c7)
+
 
 ## Introdução
 
