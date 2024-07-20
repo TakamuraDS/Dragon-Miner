@@ -106,28 +106,17 @@ def handler(signal_received, frame):
 # O objetivo final dessa função é ajudar a gerenciar logs em um arquivo (.log)
 def logg(msg):
     # basic logging 
-    logging.basicConfig(level=logging.INFO, filename="miner.log", format='%(asctime)s %(message)s') # include timestamp
+    logging.basicConfig(level=logging.INFO, filename="Informaçoes.log", format='%(asctime)s %(message)s') # include timestamp
     logging.info(msg)
 
+    # Add this section to log successful cases to a file named "Encontrados.txt"
+    if 'success' in msg:
+        with open("Encontrados.txt", "a") as success_file:
+            success_file.write(msg + "\n")
 
-def get_balance():
-    # Add your code here to retrieve the balance information
-    # This is just a placeholder example
-    balance_info = {
-        'successes': [
-            {'address': '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2', 'balance': 50},
-            {'address': '175tWpb8K1S7NmH4Zx6GDc49dkYi1mwep', 'balance': 30},
-        ],
-        'failures': []
-    }
-    return balance_info
 
-    # Add this section to log the percentage of success in getting the balance
-balance = get_balance()
-if balance != None:
-        success_percentage = (len(balance['successes']) / (len(balance['successes']) + len(balance['failures']))) * 100
-        logging.info(f"Porcentagem de sucesso na obtenção do Saldo: {success_percentage}%")
 
+        
 def get_current_block_height():
     # retorna a altura atual da rede
     r = requests.get('https://blockchain.info/latestblock')
