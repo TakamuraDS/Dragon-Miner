@@ -1,6 +1,7 @@
 
 # ---------------------------------------------------------------
-# Minerador de Bitcoin Dragon Miner - version 1.0
+# Minerador de Bitcoin Dragon Miner - version 1.7
+# Creditos : Takamura 
 # ---------------------------------------------------------------
 
 
@@ -30,7 +31,7 @@ A mineração de bitcoin requer paciência, persistência e um bom conhecimento 
 '''
 # Versão do minerador
 miner2 = '''
-    ඞ 𝚂𝚎𝚓𝚊 𝙱𝚎𝚖 𝚟𝚒𝚗𝚍𝚘 - 1.3v ඞ
+    ඞ 𝚂𝚎𝚓𝚊 𝙱𝚎𝚖 𝚟𝚒𝚗𝚍𝚘 - 1.7v ඞ
 '''
 miner3 = '''
     ╔═══════════════════════════════════════════════════════╗
@@ -108,6 +109,25 @@ def logg(msg):
     logging.basicConfig(level=logging.INFO, filename="miner.log", format='%(asctime)s %(message)s') # include timestamp
     logging.info(msg)
 
+
+def get_balance():
+    # Add your code here to retrieve the balance information
+    # This is just a placeholder example
+    balance_info = {
+        'successes': [
+            {'address': '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2', 'balance': 50},
+            {'address': '175tWpb8K1S7NmH4Zx6GDc49dkYi1mwep', 'balance': 30},
+        ],
+        'failures': []
+    }
+    return balance_info
+
+    # Add this section to log the percentage of success in getting the balance
+balance = get_balance()
+if balance != None:
+        success_percentage = (len(balance['successes']) / (len(balance['successes']) + len(balance['failures']))) * 100
+        logging.info(f"Porcentagem de sucesso na obtenção do Saldo: {success_percentage}%")
+
 def get_current_block_height():
     # retorna a altura atual da rede
     r = requests.get('https://blockchain.info/latestblock')
@@ -125,7 +145,7 @@ def calculate_hashrate(nNonce, last_updated):
         now  = time.time()
         hashrate  = round(1000000 / (now - last_updated))
         velocidadeHash = str(hashrate) + " hash/s"
-        print(Fore.RED + "       Velocidade do Hash: " + velocidadeHash)
+        print(f"{Fore.RED} Hashrate: {velocidadeHash}")
         sys.stdout.flush()
         return now   
     else:
@@ -409,78 +429,46 @@ class NewSubscribeThread(ExitedThread):
 # Parte do Codigo para fica Bonito.
 # ---------------------------------------------------------------
 
-def get_crypto_prices():
-    url = "https://api.coinpaprika.com/v1/tickers"
-    response = requests.get(url)
-    data = response.json()
-
-    btc_price = next((x['quotes']['USD']['price'] for x in data if x['symbol'] == 'BTC'), None)
-    eth_price = next((x['quotes']['USD']['price'] for x in data if x['symbol'] == 'ETH'), None)
-    doge_price = next((x['quotes']['USD']['price'] for x in data if x['symbol'] == 'DOGE'), None)
-
-    return btc_price, eth_price, doge_price
-
-
-print(Fore.BLUE, miner4, Style.RESET_ALL)
-
-btc_price, eth_price, doge_price = get_crypto_prices()
-
-print(Fore.WHITE, f"Preços atualizados em tempo real:\n", Style.RESET_ALL)
-print(Fore.RED, f"Bitcoin: ${btc_price:.2f}\n", Style.RESET_ALL)
-print(Fore.GREEN, f"Ethereum: ${eth_price:.2f}\n", Style.RESET_ALL)
-print(Fore.YELLOW, f"Dogecoin: ${doge_price:.2f}\n\n", Style.RESET_ALL)
-
-print(Fore.WHITE, miner4, Style.RESET_ALL)
 
 
 
-MOEDAS_ALTERNATIVAS = [
-    {
-        'symbol': '€',
-        'name': 'Euro',
-        'rate_id': 'latest/EUR'
-    },
-    {
-        'symbol': '£',
-        'name': 'Libra Esterlina',
-        'rate_id': 'latest/GBP'
-    }
-]
 
-def get_latest_currency_rate(base_currency='USD'):
-    """Retorna o dólar ($) atual convertido nas moedas necessárias"""
+def get_crypto_price(symbol):
+    url = f'https://api.coingecko.com/api/v3/simple/price?ids={symbol}&vs_currencies=usd'
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        return data[symbol]['usd']
+    except requests.exceptions.RequestException as e:
+        print(f'Erro ao buscar preço para {symbol}: {e}')
+        return None
 
-    url = f'https://api.exchangerate-api.com/v4/latest/{base_currency}'
-    response = requests.get(url)
-    return response.json()
+def main():
+    btc_price = get_crypto_price('bitcoin')
+    if btc_price is not None:
+        eth_price = get_crypto_price('ethereum')
+        if eth_price is not None:
+            doge_price = get_crypto_price('dogecoin')
+            if doge_price is not None:
+                print(Fore.RED,f'BTC: ${btc_price:.2f}', end='\t')
+                print(Fore.GREEN,f'ETH: ${eth_price:.2f}', end='\t')
+                print(Fore.BLUE,f'DOGE: ${doge_price:.2f}')
+            else:
+                print(f'Erro ao buscar preço para DOGE')
+        else:
+            print(f'Erro ao buscar preço para ETH')
+    else:
+        print(f'Erro ao buscar preço para BTC')
 
-def display_alternative_crypto_prices(btc_price, eth_price, doge_price):
-    currency_rates = get_latest_currency_rate()
+if __name__ == '__main__':
+    main()
 
-    euro_rate = currency_rates["rates"].get('€', 0)
-    gbp_rate = currency_rates["rates"].get('£', 0)
 
-    print(Fore.WHITE, '\nPreços atualizados em tempo real:\n', Style.RESET_ALL)
-    print(Fore.CYAN, 'Bitcoin:')
-    print(Fore.RED, f'${btc_price:.2f} ${euro_rate:.2f}€ ${gbp_rate:.2f}£')
-    print(Fore.CYAN, 'Ethereum:')
-    print(Fore.GREEN, f"${eth_price:.2f} ${euro_rate:.2f}€ ${gbp_rate:.2f}£")
-    print(Fore.CYAN, 'Dogecoin:')
-    print(Fore.YELLOW, f'${doge_price:.2f} ${euro_rate:.2f}€ ${gbp_rate:.2f}£')
+       
     
-def get_crypto_prices2():
-    url = 'https://api.coinpaprika.com/v1/tickers'
-    response = requests.get(url)
-    data = response.json()
-
-    crypto_prices = {
-        'btc': data[0]['quotes']['USD']['price'],
-        'eth': data[1]['quotes']['USD']['price'],
-        'doge': data[2]['quotes']['USD']['price'],
-    }
-
-    return crypto_prices
-
+    
+ 
 # ---------------------------------------------------------------
 # Parte do Codigo para fica Bonito.
 # ---------------------------------------------------------------
